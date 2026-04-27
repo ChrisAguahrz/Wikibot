@@ -1,0 +1,31 @@
+name: Run Wiki Bot
+
+on:
+  schedule:
+    # Runs every Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run bot
+      env:
+        WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
+        WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}
+      run: python bot.py
