@@ -104,21 +104,21 @@ def build_general_stats_section(total_edits, total_articles, page_views_data):
         f"=={MAIN_SECTION}==", "",
         "===Takwimu za Jumla===",
         '{| class="wikitable"',
-        "! Vipimo !! Thamani !! Mabadiliko", "|-",
+        "! Vipimo !! Jumla !! Mabadiliko", "|-",
         f"| Jumla ya Makala || {total_articles} || —", "|-",
         f"| Jumla ya Hariri (siku {DAYS}) || {total_edits} || —", "|-",
-        f"| Jumla ya Maoni (siku {VIEWS_DAYS}) || {total_current_views} || {view_change}", "|-",
+        f"| Jumla ya Mitazamo (siku {VIEWS_DAYS}) || {total_current_views} || {view_change}", "|-",
         f"| Wastani wa Hariri kwa Makala || {edits_per_article:.1f} || —", "|-",
     ]
     if total_articles > 0:
         avg_views = total_current_views / total_articles
-        lines.append(f"| Wastani wa Maoni kwa Makala || {avg_views:.1f} || —")
+        lines.append(f"| Wastani wa Mitazamo kwa Makala || {avg_views:.1f} || —")
     else:
-        lines.append("| Wastani wa Maoni kwa Makala || 0 || —")
+        lines.append("| Wastani wa Mitazamo kwa Makala || 0 || —")
     lines.extend(["|}", "",
         f"===Makala 5 Zilizotazamwa Zaidi (siku {VIEWS_DAYS})===",
         '{| class="wikitable sortable"',
-        "! Nafasi !! Makala !! Maoni !! Mabadiliko", "|-"])
+        "! Nafasi !! Makala !! Mitazamo !! Mabadiliko", "|-"])
     for i, (title, views) in enumerate(top_pages, 1):
         prev = previous_views.get(title, 0)
         change = get_change_indicator(views, prev)
@@ -185,13 +185,11 @@ def update_project_page(site, content):
 
 
 def main():
-    # Force login with env vars
-    username = os.getenv('WIKI_USERNAME', 'Gayle157')
-    password = os.getenv('WIKI_PASSWORD', 'CiteBot@fp5d4lfqvjrgi8d4e84s8burfovakba9')
+    username = os.getenv('WIKI_USERNAME', 'Gayle-Bot')
+    password = os.getenv('WIKI_PASSWORD', 'CountryBot@it3ipj55bu65vg6vjq57i8dq4olhsrp2')
     
     site = pywikibot.Site(SITE_CODE, FAMILY)
     
-    # Login manually
     from pywikibot.login import ClientLoginManager
     login_manager = ClientLoginManager(site=site, user=username)
     login_manager.password = password
