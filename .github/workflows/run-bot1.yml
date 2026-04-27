@@ -1,7 +1,7 @@
 name: Takwimu Bot
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 jobs:
   run-bot:
