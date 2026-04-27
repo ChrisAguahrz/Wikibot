@@ -14,9 +14,6 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Run bot
         env:
-          WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
-          WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}
-          PYTHONIOENCODING: utf-8
-        run: |
-          export PYWIKIBOT_NO_USER_CONFIG=0
-          python bot.py
+          WIKI_USERNAME: Gayle157
+          WIKI_PASSWORD: CiteBot@fp5d4lfqvjrgi8d4e84s8burfovakba9
+        run: python bot.py
