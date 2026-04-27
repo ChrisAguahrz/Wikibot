@@ -1,7 +1,7 @@
 name: Run Wiki Bot
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '0 * * * *'
   workflow_dispatch:
 jobs:
   run-bot:
@@ -12,8 +12,13 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install -r requirements.txt
-      - name: Run bot
+      - name: Run bot 1 (Takwimu)
         env:
           WIKI_USERNAME: Gayle-Bot
           WIKI_PASSWORD: CountryBot@it3ipj55bu65vg6vjq57i8dq4olhsrp2
         run: python bot.py
+      - name: Run bot 2 (CAQI)
+        env:
+          WIKI_USERNAME: Gayle-Bot
+          WIKI_PASSWORD: CountryBot@it3ipj55bu65vg6vjq57i8dq4olhsrp2
+        run: python bot2.py
