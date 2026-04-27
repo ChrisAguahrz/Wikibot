@@ -14,6 +14,13 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install -r requirements.txt
+      - name: Setup bot password
+        env:
+          WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
+          WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}
+        run: |
+          mkdir -p ~/.pywikibot
+          echo "('$WIKI_USERNAME', '$WIKI_PASSWORD')" > ~/.pywikibot/botpassword
       - name: Run bot
         env:
           WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
