@@ -14,6 +14,6 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Run bot
         env:
-          WIKI_USERNAME: Gayle157
-          WIKI_PASSWORD: CiteBot@fp5d4lfqvjrgi8d4e84s8burfovakba9
+          WIKI_USERNAME: Gayle-Bot
+          WIKI_PASSWORD: CountryBot@it3ipj55bu65vg6vjq57i8dq4olhsrp2
         run: python bot.py
