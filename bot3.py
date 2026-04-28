@@ -1,7 +1,17 @@
+import os
 import pywikibot
 from pywikibot import pagegenerators
 
+# Force login with env vars
+username = os.getenv('WIKI_USERNAME', 'Gayle-Bot')
+password = os.getenv('WIKI_PASSWORD', 'CountryBot@it3ipj55bu65vg6vjq57i8dq4olhsrp2')
+
 site = pywikibot.Site("sw", "wikipedia")
+
+from pywikibot.login import ClientLoginManager
+login_manager = ClientLoginManager(site=site, user=username)
+login_manager.password = password
+login_manager.login()
 
 start = "D"
 
