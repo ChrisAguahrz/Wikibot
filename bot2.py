@@ -1,10 +1,11 @@
 import os
 import pywikibot
 from pywikibot import pagegenerators
+from pywikibot.data import api
 import time
 import re
 import math
-from datetime import date
+from datetime import date, timedelta
 
 # Force login with env vars
 username = os.getenv('WIKI_USERNAME', 'Gayle-Bot')
@@ -45,6 +46,42 @@ PRESENCE_SECTION_TITLES = {
 IGNORED_BODY_SECTIONS = {
     "marejeo", "tazama pia", "viungo vya nje", "bibliografia", "marejeo mengine",
 }
+
+VIEWS_DAYS = 30
+
+def fetch_pageviews(page):
+    """Fetch page views for a single page for the last VIEWS_DAYS."""
+    try:
+        req = api.Request(site=site, parameters={
+            'action': 'query',
+            'format': 'json',
+            'titles': page.title(),
+            'prop': 'pageviews',
+            'pvipdays': VIEWS_DAYS,
+        })
+        data = req.submit()
+        for page_id, page_data in data.get('query', {}).get('pages', {}).items():
+            views_dict = page_data.get('pageviews', {})
+            if views_dict:
+                return sum(v for v in views_dict.values() if v is not None)
+        return 0
+    except Exception:
+        return 0
+
+def get_views_color(views):
+    """Return background color and text color based on view count."""
+    if views >= 1000:
+        return "#006400", "white"       # Dark green
+    elif views >= 700:
+        return "#228B22", "white"       # Green
+    elif views >= 500:
+        return "#3CB371", "white"       # Moderate green
+    elif views >= 300:
+        return "#90EE90", "black"       # Light green
+    elif views >= 100:
+        return "#FFA500", "black"       # Orange
+    else:
+        return "#FF4444", "white"       # Red
 
 def safe_bytes_len(value):
     return len(str(value).encode("utf-8"))
@@ -324,21 +361,23 @@ def build_pie_chart(results):
         "}}"
     ])
 
-def update_table(results):
+def update_table(results, pageviews_dict):
     try:
         text = table_page.text
     except:
         text = ""
     results.sort(key=lambda x: x[1], reverse=True)
     date_label = date.today().isoformat()
-    table = f'{{| class="wikitable sortable"\n! Nchi\n! CAQI ({date_label})<br />\n'
+    table = f'{{| class="wikitable sortable"\n! Nchi\n! CAQI ({date_label})<br />\n! Mitazamo (siku {VIEWS_DAYS})<br />\n'
     current_cat = ""
     for country, score10 in results:
         cat, color = assign_category(score10)
+        views = pageviews_dict.get(country, 0)
+        bg, text_color = get_views_color(views)
         if cat != current_cat:
-            table += f'|-\n| colspan="2" style="background-color:{color}" | {cat}\n'
+            table += f'|-\n| colspan="3" style="background-color:{color}" | {cat}\n'
             current_cat = cat
-        table += f'|-\n| {display_country(country)}\n| {score10:.2f}\n'
+        table += f'|-\n| {display_country(country)}\n| {score10:.2f}\n| style="background-color:{bg}; color:{text_color}" | {views}\n'
     table += "|}"
     pie_chart = build_pie_chart(results)
     match = re.search(r"(?m)^==\s*Makala\s*==\s*$", text)
@@ -367,7 +406,7 @@ def update_table(results):
     else:
         text += "\n\n==Makala==\n\n" + pie_chart + "\n\n" + table + "\n"
     table_page.text = text
-    table_page.save(summary="#2.0 CAQI Bot updated with new scoring rules")
+    table_page.save(summary="#2.0 CAQI Bot updated with page views column")
     print("Table updated!")
 
 # Main
@@ -382,6 +421,18 @@ for cat_name in country_categories:
 
 countries.append(pywikibot.Page(site, "Jumuiya ya Afrika Mashariki"))
 
+# Fetch page views for all countries
+print("Fetching page views...")
+pageviews_dict = {}
+for i, page in enumerate(countries):
+    views = fetch_pageviews(page)
+    pageviews_dict[page.title()] = views
+    if (i + 1) % 20 == 0:
+        print(f"  {i + 1}/{len(countries)}...")
+    time.sleep(0.3)
+
+print(f"Page views fetched for {len(pageviews_dict)} countries.")
+
 results = []
 for page in countries:
     try:
@@ -393,4 +444,4 @@ for page in countries:
     except Exception as e:
         print(f"Skipped {page.title()} -> {e}")
 
-update_table(results)
+update_table(results, pageviews_dict)
