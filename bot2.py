@@ -78,11 +78,13 @@ def get_views_color(views):
         return "#3CB371", "white"       # Moderate green
     elif views >= 300:
         return "#90EE90", "black"       # Light green
+    elif views >= 200:
+        return "#C8E6C9", "black"       # Very light green (lighter than 300+)
     elif views >= 100:
         return "#FFA500", "black"       # Orange
     else:
         return "#FF4444", "white"       # Red
-
+        
 def safe_bytes_len(value):
     return len(str(value).encode("utf-8"))
 
