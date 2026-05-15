@@ -19,7 +19,7 @@ CATEGORY_TITLE = "Jamii:Nchi"
 PROJECT_PAGE = "Wikipedia:Mradi wa Nchi"
 MAIN_SECTION = "Takwimu"
 EDITORS_SUBSECTION = "Wahariri"
-DAYS = 30
+DAYS = None
 VIEWS_DAYS = 30
 TOP_N = 10
 TOP_VIEWS = 10
@@ -197,7 +197,7 @@ def main():
     
     category = pywikibot.Category(site, CATEGORY_TITLE)
     newest = site.server_time()
-    oldest = newest - timedelta(days=DAYS)
+    oldest = None
     pages = list(category.articles(recurse=False, namespaces=0))
     total_pages = len(pages)
     
