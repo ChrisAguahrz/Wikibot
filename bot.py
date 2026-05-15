@@ -197,18 +197,35 @@ def main():
     
     category = pywikibot.Category(site, CATEGORY_TITLE)
     newest = site.server_time()
-    oldest_editors = newest - timedelta(days=EDITOR_DAYS)
-    pages = list(category.articles(recurse=False, namespaces=0))
-    total_pages = len(pages)
-    
-    print(f"Found {total_pages} articles")
-    
-    overall = Counter()
-    pages_processed = 0
-    
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        future_to_page = {executor.submit(fetch_contributors, page, newest, oldest_editors): page for page in pages}
-        for future in as_completed(future_to_page):
+oldest_total = None
+oldest_editors = newest - timedelta(days=EDITOR_DAYS)
+pages = list(category.articles(recurse=False, namespaces=0))
+total_pages = len(pages)
+
+print(f"Found {total_pages} articles")
+
+# First pass: get ALL-TIME edits for total count
+overall_total = Counter()
+with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+    future_to_page = {executor.submit(fetch_contributors, page, newest, oldest_total): page for page in pages}
+    for future in as_completed(future_to_page):
+        try:
+            result = future.result()
+            if isinstance(result, str) and result.startswith("ERROR:"):
+                continue
+            else:
+                overall_total.update(result)
+        except:
+            pass
+
+total_edits = sum(overall_total.values())
+print(f"Total edits (all time): {total_edits}")
+
+# Second pass: get 365-day edits for top editors
+overall = Counter()
+pages_processed = 0
+with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+    future_to_page = {executor.submit(fetch_contributors, page, newest, oldest_editors): page for page in pages}        for future in as_completed(future_to_page):
             pages_processed += 1
             try:
                 result = future.result()
