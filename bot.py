@@ -19,7 +19,7 @@ CATEGORY_TITLE = "Jamii:Nchi"
 PROJECT_PAGE = "Wikipedia:Mradi wa Nchi"
 MAIN_SECTION = "Takwimu"
 EDITORS_SUBSECTION = "Wahariri"
-DAYS = None
+EDITOR_DAYS = 365
 VIEWS_DAYS = 30
 TOP_N = 10
 TOP_VIEWS = 10
@@ -106,7 +106,7 @@ def build_general_stats_section(total_edits, total_articles, page_views_data):
         '{| class="wikitable"',
         "! Vipimo !! Jumla !! Mabadiliko", "|-",
         f"| Jumla ya Makala || {total_articles} || —", "|-",
-        f"| Jumla ya Hariri (siku {DAYS}) || {total_edits} || —", "|-",
+        f"| Jumla ya Hariri (siku zote) || {total_edits} || —", "|-",
         f"| Jumla ya Mitazamo (siku {VIEWS_DAYS}) || {total_current_views} || {view_change}", "|-",
         f"| Wastani wa Hariri kwa Makala || {edits_per_article:.1f} || —", "|-",
     ]
@@ -116,7 +116,7 @@ def build_general_stats_section(total_edits, total_articles, page_views_data):
     else:
         lines.append("| Wastani wa Mitazamo kwa Makala || 0 || —")
     lines.extend(["|}", "",
-        f"===Makala 5 Zilizotazamwa Zaidi (siku {VIEWS_DAYS})===",
+        f"===Makala 10 Zilizotazamwa Zaidi (siku {VIEWS_DAYS})===",
         '{| class="wikitable sortable"',
         "! Nafasi !! Makala !! Mitazamo !! Mabadiliko", "|-"])
     for i, (title, views) in enumerate(top_pages, 1):
@@ -132,7 +132,7 @@ def build_general_stats_section(total_edits, total_articles, page_views_data):
 def build_editors_subsection(overall, total_edits):
     lines = [
         f"===={EDITORS_SUBSECTION}====",
-        f"Wahariri kuu wa Mradi wa Nchi wa Wikipedia (siku {DAYS})",
+        f"Wahariri kuu wa Mradi wa Nchi wa Wikipedia (siku {EDITOR_DAYS})",
         '{| class="wikitable sortable"',
         "! Namba !! Jina !! Hariri !! Asilimia", "|-"]
     for i, (user, edits) in enumerate(overall.most_common(TOP_N), start=1):
@@ -197,7 +197,7 @@ def main():
     
     category = pywikibot.Category(site, CATEGORY_TITLE)
     newest = site.server_time()
-    oldest = None
+    oldest_editors = newest - timedelta(days=EDITOR_DAYS)
     pages = list(category.articles(recurse=False, namespaces=0))
     total_pages = len(pages)
     
@@ -207,7 +207,7 @@ def main():
     pages_processed = 0
     
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        future_to_page = {executor.submit(fetch_contributors, page, newest, oldest): page for page in pages}
+        future_to_page = {executor.submit(fetch_contributors, page, newest, oldest_editors): page for page in pages}
         for future in as_completed(future_to_page):
             pages_processed += 1
             try:
