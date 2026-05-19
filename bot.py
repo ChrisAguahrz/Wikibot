@@ -225,7 +225,8 @@ print(f"Total edits (all time): {total_edits}")
 overall = Counter()
 pages_processed = 0
 with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-    future_to_page = {executor.submit(fetch_contributors, page, newest, oldest_editors): page for page in pages}        for future in as_completed(future_to_page):
+    future_to_page = {executor.submit(fetch_contributors, page, newest, oldest_editors): page for page in pages}        
+    for future in as_completed(future_to_page):
             pages_processed += 1
             try:
                 result = future.result()
