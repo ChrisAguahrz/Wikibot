@@ -197,36 +197,40 @@ def main():
     
     category = pywikibot.Category(site, CATEGORY_TITLE)
     newest = site.server_time()
-oldest_total = None
-oldest_editors = newest - timedelta(days=EDITOR_DAYS)
-pages = list(category.articles(recurse=False, namespaces=0))
-total_pages = len(pages)
-
-print(f"Found {total_pages} articles")
-
-# First pass: get ALL-TIME edits for total count
-overall_total = Counter()
-with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-    future_to_page = {executor.submit(fetch_contributors, page, newest, oldest_total): page for page in pages}
-    for future in as_completed(future_to_page):
-        try:
-            result = future.result()
-            if isinstance(result, str) and result.startswith("ERROR:"):
-                continue
-            else:
-                overall_total.update(result)
-        except:
-            pass
-
-total_edits = sum(overall_total.values())
-print(f"Total edits (all time): {total_edits}")
-
-# Second pass: get 365-day edits for top editors
-overall = Counter()
-pages_processed = 0
-with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-    future_to_page = {executor.submit(fetch_contributors, page, newest, oldest_editors): page for page in pages}        
-    for future in as_completed(future_to_page):
+    oldest = None
+    pages = list(category.articles(recurse=False, namespaces=0))
+    total_pages = len(pages)
+    
+    print(f"Found {total_pages} articles")
+    
+    # Fetch ALL-TIME edits for total count
+    overall_total = Counter()
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        future_to_page = {executor.submit(fetch_contributors, page, newest, oldest): page for page in pages}
+        for future in as_completed(future_to_page):
+            try:
+                result = future.result()
+                if isinstance(result, str) and result.startswith("ERROR:"):
+                    continue
+                else:
+                    overall_total.update(result)
+            except:
+                pass
+    
+    total_edits = sum(overall_total.values())
+    print(f"Total edits (all time): {total_edits}")
+    
+    if not overall_total:
+        return
+    
+    # Fetch 365-day edits for top editors
+    oldest_editors = newest - timedelta(days=EDITOR_DAYS)
+    overall = Counter()
+    pages_processed = 0
+    
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        future_to_page = {executor.submit(fetch_contributors, page, newest, oldest_editors): page for page in pages}
+        for future in as_completed(future_to_page):
             pages_processed += 1
             try:
                 result = future.result()
@@ -243,15 +247,10 @@ with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
             print(f"\r[{bar}] {percent:.1f}% ({pages_processed}/{total_pages}) - {len(overall)} editors", end='', flush=True)
     
     print()
-    total_edits = sum(overall.values())
     
-    if not overall:
-        return
-    
-    print(f"Total edits: {total_edits}")
-    for i, (user, total) in enumerate(overall.most_common(10), start=1):
-        share = (total / total_edits * 100) if total_edits > 0 else 0
-        print(f"{i}. {user} - {total} ({share:.1f}%)")
+    for i, (user, edits) in enumerate(overall.most_common(10), start=1):
+        share = (edits / sum(overall.values()) * 100) if sum(overall.values()) > 0 else 0
+        print(f"{i}. {user} - {edits} ({share:.1f}%)")
     
     print("Fetching page views...")
     all_current_views = {}
@@ -267,7 +266,7 @@ with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
     page_views_data = (all_current_views, all_previous_views)
     print("Updating project page...")
     general_stats = build_general_stats_section(total_edits, total_pages, page_views_data)
-    editors_section = build_editors_subsection(overall, total_edits)
+    editors_section = build_editors_subsection(overall, sum(overall.values()))
     full_content = general_stats + "\n" + editors_section + "\n"
     update_project_page(site, full_content)
     print("Done!")
