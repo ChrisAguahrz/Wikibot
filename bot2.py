@@ -70,6 +70,8 @@ def fetch_pageviews(page):
 
 def get_views_color(views):
     """Return background color and text color based on view count."""
+    if views < 50:
+        return "#8B0000", "white"       # Dark red
     if views >= 1000:
         return "#006400", "white"       # Dark green
     elif views >= 700:
@@ -79,7 +81,7 @@ def get_views_color(views):
     elif views >= 300:
         return "#90EE90", "black"       # Light green
     elif views >= 200:
-        return "#C8E6C9", "black"       # Very light green (lighter than 300+)
+        return "#C8E6C9", "black"       # Very light green
     elif views >= 100:
         return "#FFA500", "black"       # Orange
     else:
