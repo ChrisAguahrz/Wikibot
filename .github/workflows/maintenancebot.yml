@@ -16,4 +16,4 @@ jobs:
         env:
           WIKI_USERNAME: Gayle-Bot
           WIKI_PASSWORD: MaintBot@ps2kuijk7vaoinj58lof543cg4nhhs8o
-        run: python m2.py
+        run: python bot4.py
