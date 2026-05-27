@@ -1,0 +1,19 @@
+name: Maintenance Bot
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Run maintenance bot
+        env:
+          WIKI_USERNAME: Gayle-Bot
+          WIKI_PASSWORD: MaintBot@ps2kuijk7vaoinj58lof543cg4nhhs8o
+        run: python m2.py
