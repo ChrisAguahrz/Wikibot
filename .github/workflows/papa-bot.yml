@@ -12,5 +12,5 @@ jobs:
       - name: Run Papa bot
         env:
           WIKI_USERNAME: Gayle-Bot
-          WIKI_PASSWORD: CountryBot@it3ipj55bu65vg6vjq57i8dq4olhsrp2
+          WIKI_PASSWORD: PapaBot@o11j8tnp1b6saj612jnjm5sl0giehjsp
         run: python papa_bot.py
