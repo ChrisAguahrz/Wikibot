@@ -9,9 +9,17 @@ lm.password = password
 lm.login()
 
 category = pywikibot.Category(site, "Jamii:Papa")
-for page in category.articles():
+pages = list(category.articles())
+print(f"Found {len(pages)} pages")
+
+for page in pages:
     text = page.text
+    print(f"Checking: {page.title()}...")
     if "[[Jamii:Papa]]" in text:
         page.text = text.replace("[[Jamii:Papa]]", "[[Jamii:Mapapa]]")
         page.save(summary="Bot: [[Jamii:Papa]] → [[Jamii:Mapapa]]")
-        print(f"Edited: {page.title()}")
+        print(f"  EDITED!")
+    elif "Jamii:Papa" in text:
+        print(f"  Contains Jamii:Papa but not exact match. Found: {text[text.find('Jamii:Papa')-5:text.find('Jamii:Papa')+20]}")
+    else:
+        print(f"  No Jamii:Papa found")
