@@ -15,11 +15,19 @@ print(f"Found {len(pages)} pages")
 for page in pages:
     text = page.text
     print(f"Checking: {page.title()}...")
-    if "[[Jamii:Papa]]" in text:
+    
+    # Check for both Category:Papa and Jamii:Papa
+    if "[[Category:Papa]]" in text:
         page.text = text.replace("[[Category:Papa]]", "[[Jamii:Mapapa]]")
+        page.save(summary="Bot: [[Category:Papa]] → [[Jamii:Mapapa]]")
+        print(f"  EDITED Category:Papa!")
+    elif "[[Jamii:Papa]]" in text:
+        page.text = text.replace("[[Jamii:Papa]]", "[[Jamii:Mapapa]]")
         page.save(summary="Bot: [[Jamii:Papa]] → [[Jamii:Mapapa]]")
-        print(f"  EDITED!")
+        print(f"  EDITED Jamii:Papa!")
     elif "Jamii:Papa" in text:
         print(f"  Contains Jamii:Papa but not exact match. Found: {text[text.find('Jamii:Papa')-5:text.find('Jamii:Papa')+20]}")
+    elif "Category:Papa" in text:
+        print(f"  Contains Category:Papa but not exact match. Found: {text[text.find('Category:Papa')-5:text.find('Category:Papa')+20]}")
     else:
-        print(f"  No Jamii:Papa found")
+        print(f"  No Jamii:Papa or Category:Papa found")
