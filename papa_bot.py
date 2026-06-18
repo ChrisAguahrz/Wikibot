@@ -1,4 +1,4 @@
-import os, pywikibot
+import os, pywikibot, re
 from pywikibot.login import ClientLoginManager
 
 username = os.getenv('WIKI_USERNAME', 'Gayle-Bot')
@@ -9,25 +9,36 @@ lm.password = password
 lm.login()
 
 category = pywikibot.Category(site, "Jamii:Papa")
-pages = list(category.articles())
-print(f"Found {len(pages)} pages")
+
+# Get articles AND subcategories
+pages = list(category.articles()) + list(category.subcategories())
+print(f"Found {len(pages)} pages (articles + subcategories)")
 
 for page in pages:
     text = page.text
     print(f"Checking: {page.title()}...")
+    edited = False
     
-    # Check for both Category:Papa and Jamii:Papa
-    if "[[Category:Papa]]" in text:
-        page.text = text.replace("[[Category:Papa]]", "[[Jamii:Mapapa]]")
-        page.save(summary="Bot: [[Category:Papa]] → [[Jamii:Mapapa]]")
-        print(f"  EDITED Category:Papa!")
-    elif "[[Jamii:Papa]]" in text:
-        page.text = text.replace("[[Jamii:Papa]]", "[[Jamii:Mapapa]]")
-        page.save(summary="Bot: [[Jamii:Papa]] → [[Jamii:Mapapa]]")
-        print(f"  EDITED Jamii:Papa!")
-    elif "Jamii:Papa" in text:
-        print(f"  Contains Jamii:Papa but not exact match. Found: {text[text.find('Jamii:Papa')-5:text.find('Jamii:Papa')+20]}")
-    elif "Category:Papa" in text:
-        print(f"  Contains Category:Papa but not exact match. Found: {text[text.find('Category:Papa')-5:text.find('Category:Papa')+20]}")
-    else:
-        print(f"  No Jamii:Papa or Category:Papa found")
+    # Find all category/subcategory links (both [[Category:...]] and [[Jamii:...]])
+    pattern = r'\[\[(Jamii|Category):Papa(\|[^\]]*)?\]\]'
+    matches = re.findall(pattern, text)
+    
+    if matches:
+        # Replace all occurrences
+        new_text = re.sub(pattern, r'[[Jamii:Mapapa\2]]', text)
+        if new_text != text:
+            page.text = new_text
+            page.save(summary="Bot: [[Jamii:Papa]]/[[Category:Papa]] → [[Jamii:Mapapa]]")
+            print(f"  EDITED! Replaced {len(matches)} occurrence(s)")
+            edited = True
+    
+    if not edited:
+        # Check for loose mentions
+        if "Jamii:Papa" in text:
+            idx = text.find('Jamii:Papa')
+            print(f"  Contains Jamii:Papa but not in brackets. Found: ...{text[max(0,idx-10):idx+20]}...")
+        elif "Category:Papa" in text:
+            idx = text.find('Category:Papa')
+            print(f"  Contains Category:Papa but not in brackets. Found: ...{text[max(0,idx-10):idx+20]}...")
+        else:
+            print(f"  No Jamii:Papa or Category:Papa found")
