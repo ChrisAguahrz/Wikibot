@@ -16,7 +16,7 @@ for page in pages:
     text = page.text
     print(f"Checking: {page.title()}...")
     if "[[Jamii:Papa]]" in text:
-        page.text = text.replace("[[Jamii:Papa]]", "[[Jamii:Mapapa]]")
+        page.text = text.replace("[[Category:Papa]]", "[[Jamii:Mapapa]]")
         page.save(summary="Bot: [[Jamii:Papa]] → [[Jamii:Mapapa]]")
         print(f"  EDITED!")
     elif "Jamii:Papa" in text:
