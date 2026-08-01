@@ -1,3 +1,4 @@
+
 import os
 import pywikibot
 from pywikibot import pagegenerators
@@ -365,6 +366,22 @@ def build_pie_chart(results):
         "}}"
     ])
 
+def remove_wikitable(text):
+    """Remove a complete wikitable by tracking {| and |} pairs."""
+    lines = text.split('\n')
+    result_lines = []
+    in_table = False
+    for line in lines:
+        if not in_table and line.strip().startswith('{| class="wikitable sortable"'):
+            in_table = True
+            continue
+        if in_table and line.strip() == '|}':
+            in_table = False
+            continue
+        if not in_table:
+            result_lines.append(line)
+    return '\n'.join(result_lines)
+
 def update_table(results, pageviews_dict):
     try:
         text = table_page.text
@@ -384,6 +401,7 @@ def update_table(results, pageviews_dict):
         table += f'|-\n| {display_country(country)}\n| {score10:.2f}\n| style="background-color:{bg}; color:{text_color}" | {views}\n'
     table += "|}"
     pie_chart = build_pie_chart(results)
+    
     match = re.search(r"(?m)^==\s*Makala\s*==\s*$", text)
     if match:
         start = match.end()
@@ -394,8 +412,13 @@ def update_table(results, pageviews_dict):
         else:
             section_body = text[start:]
             tail = ""
+        
+        # Remove old pie chart
         section_body = re.sub(r"\{\{Chati ya duara.*?\}\}", "", section_body, flags=re.S)
-        section_body = re.sub(r"\{\| class=\"wikitable sortable\".*?\|\}", "", section_body, flags=re.S)
+        
+        # Remove old wikitable using the robust function
+        section_body = remove_wikitable(section_body)
+        
         section_body = section_body.rstrip()
         new_parts = []
         if section_body.strip():
@@ -409,6 +432,7 @@ def update_table(results, pageviews_dict):
             text = text[:start] + "\n\n" + new_body + "\n"
     else:
         text += "\n\n==Makala==\n\n" + pie_chart + "\n\n" + table + "\n"
+    
     table_page.text = text
     table_page.save(summary="#2.0 CAQI Bot updated with page views column")
     print("Table updated!")
