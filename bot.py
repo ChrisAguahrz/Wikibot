@@ -9,6 +9,7 @@ import re
 import time
 import sys
 
+
 import pywikibot
 from pywikibot.data import api
 
@@ -169,10 +170,12 @@ def update_project_page(site, content):
             before_section = text[:match.end()]
             after_section = text[next_match.start():]
             content_body = content.split(f"=={MAIN_SECTION}==", 1)[1] if f"=={MAIN_SECTION}==" in content else content
+            content_body = "\n" + content_body.lstrip("\r\n")
             new_text = before_section + content_body + after_section
         else:
             before_section = text[:match.end()]
             content_body = content.split(f"=={MAIN_SECTION}==", 1)[1] if f"=={MAIN_SECTION}==" in content else content
+            content_body = "\n" + content_body.lstrip("\r\n")
             new_text = before_section + content_body
     else:
         if text and not text.endswith("\n"):
