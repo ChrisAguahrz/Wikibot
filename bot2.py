@@ -1,4 +1,3 @@
-
 import os
 import pywikibot
 from pywikibot import pagegenerators
@@ -7,7 +6,6 @@ import time
 import re
 import math
 from datetime import date, timedelta
-
 # Force login with env vars
 username = os.getenv('WIKI_USERNAME', 'Gayle-Bot')
 password = os.getenv('WIKI_PASSWORD', 'CountryBot@it3ipj55bu65vg6vjq57i8dq4olhsrp2')
@@ -427,9 +425,9 @@ def update_table(results, pageviews_dict):
         new_parts.append(table)
         new_body = "\n\n".join(new_parts)
         if tail:
-            text = text[:start] + "\n\n" + new_body + "\n\n" + tail.lstrip("\n")
+            text = text[:start] + "\n" + new_body + "\n\n" + tail.lstrip("\n")
         else:
-            text = text[:start] + "\n\n" + new_body + "\n"
+            text = text[:start] + "\n" + new_body + "\n"
     else:
         text += "\n\n==Makala==\n\n" + pie_chart + "\n\n" + table + "\n"
     
